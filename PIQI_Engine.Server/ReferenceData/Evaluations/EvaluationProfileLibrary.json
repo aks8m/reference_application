@@ -13,7 +13,7 @@
 	{
       "name": "USCDI v3.1",
       "mnemonic": "USCDI_V31",
-      "filePath": "ReferenceData/Evaluations/USCDI_3_1.json"
+      "filePath": "ReferenceData/Evaluations/USCDI_v3_1.json"
     }
   ]
 }
