@@ -125,7 +125,11 @@ public partial class Program
         var logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).Enrich.FromLogContext().CreateLogger();
         loggerFactory.AddSerilog(logger);
 
-        app.UseHttpsRedirection();
+        if (app.Environment.IsDevelopment())
+        {
+            // Redirects to HTTPS only when you are debugging locally
+            app.UseHttpsRedirection();
+        }
         app.UseRouting();
 
         app.UseCors("AllowAll");
@@ -133,15 +137,19 @@ public partial class Program
         app.UseDefaultFiles();
         app.UseStaticFiles();
 
-        app.UseSwagger();
-        app.UseSwaggerUI(options =>
+        // Swagger is exposed for the Reference App environment or Development
+        if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("ReferenceApp"))
         {
-            options.SwaggerEndpoint(builder.Configuration["CustomSwaggerUI:SwaggerEndpoint"], openApi.Version);
-            options.InjectStylesheet(builder.Configuration["CustomSwaggerUI:CSSPath"]);
-            options.InjectJavascript(builder.Configuration["CustomSwaggerUI:JSPath"], "text/javascript");
-            options.DocumentTitle = builder.Configuration["CustomSwaggerUI:DocTitle"];
-            options.DefaultModelsExpandDepth(-1);
-        });
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint(builder.Configuration["CustomSwaggerUI:SwaggerEndpoint"], openApi.Version);
+                options.InjectStylesheet(builder.Configuration["CustomSwaggerUI:CSSPath"]);
+                options.InjectJavascript(builder.Configuration["CustomSwaggerUI:JSPath"], "text/javascript");
+                options.DocumentTitle = builder.Configuration["CustomSwaggerUI:DocTitle"];
+                options.DefaultModelsExpandDepth(-1);
+            });
+        }
 
         app.MapControllers();
 
