@@ -1,0 +1,51 @@
+services:
+  # ---------------------------------------------------
+  # 1. THE REFERENCE SERVER: PIQI Engine
+  # ---------------------------------------------------
+  piqi-engine:
+    build:
+      context: .
+    container_name: piqi-engine
+    restart: unless-stopped
+    ports:
+      - "${PIQI_ENGINE_PORT:-8080}:${PIQI_ENGINE_PORT:-8080}"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${PIQI_ENVIRONMENT_NAME}
+      - ASPNETCORE_HTTP_PORTS=${PIQI_ENGINE_PORT:-8080}
+      - Database__Type=${PIQI_DB_TYPE}
+      - ConnectionStrings__PIQIDatabase=Host=postgres-db;Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+    depends_on:
+      - postgres-db
+
+  # ---------------------------------------------------
+  # 2. THE DATABASE: PostgreSQL 
+  # ---------------------------------------------------
+  postgres-db:
+    image: postgres:16
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      # Saves your database data securely in a Docker managed volume
+      - pgdata:/var/lib/postgresql/data
+
+  # ---------------------------------------------------
+  # 3. DATABASE UI: pgAdmin
+  # ---------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    depends_on:
+      - postgres-db
+
+volumes:
+  pgdata:

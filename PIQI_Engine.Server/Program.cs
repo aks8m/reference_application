@@ -19,7 +19,7 @@ public partial class Program
 
         // Add services to the container.
         builder.Services.AddControllers();
-
+    
         // Add CORS policy
         builder.Services.AddCors(options =>
         {
